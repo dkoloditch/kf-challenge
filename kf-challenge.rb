@@ -42,7 +42,8 @@ class Elevator
 
   def go_to_destination(request_floor_number)
     report_doors_closed
-    floor_difference = (@current_floor - request_floor_number) / (@current_floor - request_floor_number)
+    floor_difference = @current_floor == request_floor_number ? 0
+                         : (@current_floor - request_floor_number) / (@current_floor - request_floor_number)
 
     # iterate over floors and report floors in appropriate direction
     floor_difference.times do |f|
@@ -106,37 +107,37 @@ class ElevatorController
 
   def get_elevator(request_floor_number)
     # unoccupied, stopped elevators at request floor always have the highest priority
-    e = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}.first
-    return e if e
+    elevator = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}.first
+    return elevator if elevator
 
     # when a request is made, the unoccupied elevator closest to it will answer the call, 
     # unless an occupied elevator is moving and will pass that floor on its way. 
+    closest_elevator = nil
     @elevators.select{|e| e.occupied == Elevator::UNOCCUPIED }.first # TODO: && closest floor
 
-    e.current_floor = request_floor_number
+    @elevators.each do |e|
+      if closest_elevator.nil? # difference between e's current floor and request floor is the smallest
+        closest_elevator = e
+      else
+      end
+    end
+
+    elevator.current_floor = request_floor_number
 
     raise "Elevators not responding to requests. Maintenance needed." if !e
   end
-
-  # def request_destination
-  #   # cannot go above top floor
-
-  #   # cannot go below ground floor (1)
-
-  #   # set elevator occupied
-  # end
 end
 
 
 # tests
 ec = ElevatorController.new
-p ec.elevators.first.door_status == Elevator::UNOCCUPIED
-p ec.elevators.count == 1
-p ec.elevators.first.door_status == Elevator::DOORS_CLOSED
-p ec.elevators.first.trip_count == 0
-p ec.elevators.first.floors_passed == 0
+# p ec.elevators.first.door_status == Elevator::UNOCCUPIED
+# p ec.elevators.count == 1
+# p ec.elevators.first.door_status == Elevator::DOORS_CLOSED
+# p ec.elevators.first.trip_count == 0
+# p ec.elevators.first.floors_passed == 0
 
-ec.request_elevator(1)
+ec.request_elevator(2)
 # moving elevator should report - need rspec to listen for appropriate calls
 # respective elevator doors should be closed until arriving - need rspec to listen for appropriate calls
 # closest elevator should be chosen
