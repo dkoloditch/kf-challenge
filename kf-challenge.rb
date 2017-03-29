@@ -11,7 +11,7 @@ class Elevator
   DOORS_CLOSED = 0
   DOORS_OPEN = 1
   
-  def initialize(floors = 1)
+  def initialize()
     @occupied = UNOCCUPIED
     @current_floor = 1
     @door_status = DOORS_CLOSED
@@ -62,8 +62,9 @@ class ElevatorController
   # adds greater complexity and potentially overhead as the number of 
   # elevators grow
 
-  def initialize(elevators = 1)
+  def initialize(elevators = 1, floors = 2)
     @elevators = []
+    @floors = floors
 
     elevators.times do
       @elevators << Elevator.new
@@ -78,21 +79,27 @@ class ElevatorController
     elevator = get_elevator(request_floor_number)
 
     # request can be made at any floor, to go to any other floor
-
-    # implicit: requests FOR elevators (not floors) can be made from within 
-    # the elevator or from specific floors
+    if request < 1 || request > @floors
+      # invalid request. ask for new floor request.
+    else
+      # send elevator to floor
+    end
 
     elevator.report_doors_open
   end
 
   def get_elevator(request_floor_number)
-    # is an unoccupied elevator is already stopped at that floor?
-    # then it will always have the highest priority answering that call.
-    e = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}
+    # unoccupied, stopped elevators at request floor always have the highest priority
+    e = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}.first
     return e if e
 
     # when a request is made, the unoccupied elevator closest to it will answer the call, 
     # unless an occupied elevator is moving and will pass that floor on its way. 
+    @elevators.select{|e| e.occupied == Elevator::UNOCCUPIED }.first # TODO: && closest floor
+
+    e.current_floor = request_floor_number
+
+    raise "Elevators not responding to requests. Maintenance needed." if !e
   end
 
   def request_destination
