@@ -1,3 +1,9 @@
+# NOTE: I generally approached this challenge by hashing out the general
+# structure of the system at first, then trying to refine that structure
+# as I implemented the details. Reason being, the implementation details
+# have a way of guiding the structure and it's easier for me to think
+# about using this format.
+
 class Elevator
   attr_accessor :occupied
   attr_accessor :current_floor
@@ -112,19 +118,20 @@ class ElevatorController
 
     # when a request is made, the unoccupied elevator closest to it will answer the call, 
     # unless an occupied elevator is moving and will pass that floor on its way. 
-    closest_elevator = nil
-    @elevators.select{|e| e.occupied == Elevator::UNOCCUPIED }.first # TODO: && closest floor
-
-    @elevators.each do |e|
-      if closest_elevator.nil? # difference between e's current floor and request floor is the smallest
-        closest_elevator = e
-      else
-      end
+    
+    # find the closest elevator by mapping the floors, finding the closest one to the request
+    # floor, then searching the list of elevators for the elevator which the closest floor
+    elevator_current_floors = @elevators.map {|e| e.current_floor}
+    
+    closest_difference_and_floor = []
+    elevator_current_floors.each do |floor|
+      diff = floor - request_floor_number
+      closest_difference_and_floor << diff and closest_difference_and_floor << floor if closest_difference_and_floor.empty?
     end
 
-    elevator.current_floor = request_floor_number
+    # elevator.go_to_destination(request_floor_number)
 
-    raise "Elevators not responding to requests. Maintenance needed." if !e
+    raise "Elevators not responding to requests. Maintenance needed." if !elevator
   end
 end
 
