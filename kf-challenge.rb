@@ -24,9 +24,23 @@ class Elevator
   end
 
   def report_doors_open
+    @door_status = DOORS_OPEN
+
+    puts "Elevator doors are now open."
   end
 
   def report_doors_closed
+    @door_status = DOORS_CLOSED
+
+    puts "Elevator doors are now closed."
+  end
+
+  def go_to_destination
+    report_doors_closed
+
+    # iterate over floors in appropriate direction
+
+    report_doors_open
   end
 
   def record_trip_count
@@ -60,18 +74,22 @@ class ElevatorController
     @elevators
   end
 
-  def request_elevator
-    elevator = get_elevator
+  def request_elevator(request_floor_number)
+    elevator = get_elevator(request_floor_number)
 
     # request can be made at any floor, to go to any other floor
 
     # implicit: requests FOR elevators (not floors) can be made from within 
     # the elevator or from specific floors
+
+    elevator.report_doors_open
   end
 
-  def get_elevator
+  def get_elevator(request_floor_number)
     # is an unoccupied elevator is already stopped at that floor?
     # then it will always have the highest priority answering that call.
+    e = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}
+    return e if e
 
     # when a request is made, the unoccupied elevator closest to it will answer the call, 
     # unless an occupied elevator is moving and will pass that floor on its way. 
@@ -94,6 +112,13 @@ p ec.elevators.count == 1
 p ec.elevators.first.door_status == Elevator::DOORS_CLOSED
 p ec.elevators.first.trip_count == 0
 p ec.elevators.first.floors_passed == 0
+
+ec.request_elevator(1)
+# moving elevator should report - need rspec to listen for appropriate calls
+# respective elevator doors should be closed until arriving - need rspec to listen for appropriate calls
+# closest elevator should be chosen
+# elevator cannot respond to requests from floors outside limits
+# elevator floor and trip counts should be accurate
 
 
 
