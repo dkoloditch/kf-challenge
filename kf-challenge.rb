@@ -5,11 +5,14 @@ class Elevator
   attr_accessor :door_status
   attr_accessor :trip_count
   attr_accessor :floors_passed
+  attr_accessor :maintenance_status
 
   UNOCCUPIED = 0
   OCCUPIED = 1
   DOORS_CLOSED = 0
   DOORS_OPEN = 1
+  NOT_UNDER_MAINTENANCE = 0
+  UNDER_MAINTENANCE = 1
   
   def initialize()
     @occupied = UNOCCUPIED
@@ -17,10 +20,7 @@ class Elevator
     @door_status = DOORS_CLOSED
     @trip_count = 0
     @floors_passed = 0
-  end
-
-  def report_floor_number
-    puts @current_floor
+    @maintenance_status = NOT_UNDER_MAINTENANCE
   end
 
   def report_doors_open
@@ -35,25 +35,42 @@ class Elevator
     puts "Elevator doors are now closed."
   end
 
-  def go_to_destination
+  def report_floor_number(f)
+    @current_floor = f
+    puts @current_floor
+  end
+
+  def go_to_destination(request_floor_number)
     report_doors_closed
+    floor_difference = (@current_floor - request_floor_number) / (@current_floor - request_floor_number)
 
-    # iterate over floors in appropriate direction
+    # iterate over floors and report floors in appropriate direction
+    floor_difference.times do |f|
+      report_floor_number(f)
+    end
 
+    record_floors_passed(floor_difference)
+    record_trip_count
     report_doors_open
+
+    @maintenance_status = UNDER_MAINTENANCE if time_for_maintenance?
+  end
+
+  def record_floors_passed(floors)
+    @floors_passed += floors
   end
 
   def record_trip_count
-    # up and down
-  end
-
-  def record_floors_passed
-    # any change in movement
+    # unless elevator didn't actually move (was already on request floor)
+    @trip_count += 1
   end
 
   def time_for_maintenance?
     # maintenance mode after 100 trips w/ no functionality until serviced
-    @trip_count > 100
+    maintenance_needed = @trip_count > 100
+
+    puts "Elevator entered into maintenance." if maintenance_needed
+    maintenance_needed
   end
 end
 
@@ -77,15 +94,14 @@ class ElevatorController
 
   def request_elevator(request_floor_number)
     elevator = get_elevator(request_floor_number)
+    elevator.report_doors_open
 
     # request can be made at any floor, to go to any other floor
-    if request < 1 || request > @floors
+    if request_floor_number < 1 || request_floor_number > @floors
       # invalid request. ask for new floor request.
     else
-      # send elevator to floor
+      elevator.go_to_destination(request_floor_number)
     end
-
-    elevator.report_doors_open
   end
 
   def get_elevator(request_floor_number)
@@ -102,13 +118,13 @@ class ElevatorController
     raise "Elevators not responding to requests. Maintenance needed." if !e
   end
 
-  def request_destination
-    # cannot go above top floor
+  # def request_destination
+  #   # cannot go above top floor
 
-    # cannot go below ground floor (1)
+  #   # cannot go below ground floor (1)
 
-    # set elevator occupied
-  end
+  #   # set elevator occupied
+  # end
 end
 
 
