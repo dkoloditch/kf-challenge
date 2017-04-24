@@ -4,6 +4,9 @@
 # have a way of guiding the structure and it's easier for me to think
 # about using this format.
 
+gem 'minitest', '>= 5.0.0'
+require 'minitest/autorun'
+
 class Elevator
   attr_accessor :occupied
   attr_accessor :current_floor
@@ -19,7 +22,7 @@ class Elevator
   DOORS_OPEN = 1
   NOT_UNDER_MAINTENANCE = 0
   UNDER_MAINTENANCE = 1
-  
+
   def initialize()
     @occupied = UNOCCUPIED
     @current_floor = 1
@@ -83,7 +86,7 @@ end
 
 class ElevatorController
   # reasoning for controller: having elevators communicate between themselves
-  # adds greater complexity and potentially overhead as the number of 
+  # adds greater complexity and potentially overhead as the number of
   # elevators grow
 
   def initialize(elevators = 1, floors = 2)
@@ -116,13 +119,13 @@ class ElevatorController
     elevator = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}.first
     return elevator if elevator
 
-    # when a request is made, the unoccupied elevator closest to it will answer the call, 
-    # unless an occupied elevator is moving and will pass that floor on its way. 
-    
+    # when a request is made, the unoccupied elevator closest to it will answer the call,
+    # unless an occupied elevator is moving and will pass that floor on its way.
+
     # find the closest elevator by mapping the floors, finding the closest one to the request
     # floor, then searching the list of elevators for the elevator which the closest floor
     elevator_current_floors = @elevators.map {|e| e.current_floor}
-    
+
     closest_difference_and_floor = []
     elevator_current_floors.each do |floor|
       diff = floor - request_floor_number
@@ -136,24 +139,23 @@ class ElevatorController
 end
 
 
-# tests
-ec = ElevatorController.new
-# p ec.elevators.first.door_status == Elevator::UNOCCUPIED
-# p ec.elevators.count == 1
-# p ec.elevators.first.door_status == Elevator::DOORS_CLOSED
-# p ec.elevators.first.trip_count == 0
-# p ec.elevators.first.floors_passed == 0
+class ElevatorTest < Minitest::Test
+  # @ec = ElevatorController.new
+  # p ec.elevators.first.door_status == Elevator::UNOCCUPIED
+  # p ec.elevators.count == 1
+  # p ec.elevators.first.door_status == Elevator::DOORS_CLOSED
+  # p ec.elevators.first.trip_count == 0
+  # p ec.elevators.first.floors_passed == 0
 
-ec.request_elevator(2)
-# moving elevator should report - need rspec to listen for appropriate calls
-# respective elevator doors should be closed until arriving - need rspec to listen for appropriate calls
-# closest elevator should be chosen
-# elevator cannot respond to requests from floors outside limits
-# elevator floor and trip counts should be accurate
+  # ec.request_elevator(2)
+  # moving elevator should report - need rspec to listen for appropriate calls
+  # respective elevator doors should be closed until arriving - need rspec to listen for appropriate calls
+  # closest elevator should be chosen
+  # elevator cannot respond to requests from floors outside limits
+  # elevator floor and trip counts should be accurate
 
-
-
-
-
-
-
+  def test_count_one_word
+    ec = ElevatorController.new
+    assert_equal ec.class, ElevatorController
+  end
+end
