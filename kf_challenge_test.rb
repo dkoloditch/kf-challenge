@@ -2,6 +2,7 @@ gem 'minitest', '>= 5.0.0'
 require 'minitest/autorun'
 
 require_relative "elevator_controller"
+require_relative "elevator"
 
 class ElevatorTest < Minitest::Test
   # @ec = ElevatorController.new
@@ -18,13 +19,64 @@ class ElevatorTest < Minitest::Test
   # elevator cannot respond to requests from floors outside limits
   # elevator floor and trip counts should be accurate
 
-  def test_basic_test
-    ec = ElevatorController.new
-    assert_equal ec.class, ElevatorController
+  def test_get_all_elevators
+    ec = ElevatorController.new(3, 10)
+    assert ec.get_all_elevators.count, 3
   end
 
-  def test_elevator_request
-    ec = ElevatorController.new
-    assert ec.request_elevator(2), nil
+  def test_gets_only_unoccupied_elevators
+    ec = ElevatorController.new(3, 10)
+    elevators = ec.get_all_elevators
+    elevators[0].occupied = Elevator::OCCUPIED
+    elevators[1].occupied = Elevator::OCCUPIED
+    unoccupied_elevators = ec.get_unoccupied_elevators
+    assert unoccupied_elevators.count, 1
+    assert unoccupied_elevators.first == elevators[2]
+  end
+
+  def test_get_elevator_returns_passing_occupied_elevator_first
+    ec = ElevatorController.new(4, 10)
+    elevators = ec.get_all_elevators
+
+    # unoccupied elevator is closest
+    request_floor_number = 5
+    elevators[0].occupied = Elevator::OCCUPIED
+    elevators[0].current_floor = 1
+    elevators[1].occupied = Elevator::OCCUPIED
+    elevators[0].current_floor = 2
+    elevators[2].occupied = Elevator::OCCUPIED
+    elevators[2].current_floor = 10
+    elevators[3].current_floor = 6
+
+    assert_equal ec.get_elevator(5), elevators[0]
+  end
+
+  def test_get_elevator_returns_closest_unoccupied_elevator
+    ec = ElevatorController.new(4, 10)
+    elevators = ec.get_all_elevators
+
+    # unoccupied elevator is farthest away
+    request_floor_number = 3
+    elevators[0].occupied = Elevator::OCCUPIED
+    elevators[0].current_floor = 2
+    elevators[1].occupied = Elevator::OCCUPIED
+    elevators[0].current_floor = 3
+    elevators[2].occupied = Elevator::OCCUPIED
+    elevators[2].current_floor = 4
+    elevators[3].current_floor = 1
+
+    assert_equal ec.get_elevator(3), elevators[3]
+
+    # unoccupied elevator is closest
+    request_floor_number = 5
+    elevators[0].occupied = Elevator::OCCUPIED
+    elevators[0].current_floor = 1
+    elevators[1].occupied = Elevator::OCCUPIED
+    elevators[0].current_floor = 2
+    elevators[2].occupied = Elevator::OCCUPIED
+    elevators[2].current_floor = 10
+    elevators[3].current_floor = 6
+
+    assert_equal ec.get_elevator(5), elevators[3]
   end
 end

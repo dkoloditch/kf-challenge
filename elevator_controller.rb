@@ -14,21 +14,26 @@ class ElevatorController
     end
   end
 
-  def elevators
+  def get_all_elevators
     @elevators
   end
 
   def get_unoccupied_elevators
-    elevators.select{|e| e.occupied == Elevator::UNOCCUPIED}
+    get_all_elevators.select{|e| e.occupied == Elevator::UNOCCUPIED}
   end
 
   def request_elevator(request_floor_number)
     elevator = get_elevator(request_floor_number)
+  end
+
+  def process_elevator_request(request_floor_number)
+    elevator = request_elevator(request_floor_number)
 
     # request can be made at any floor, to go to any other floor
     if request_floor_number < 1 || request_floor_number > @floors
       # invalid request. ask for new floor request.
     else
+      elevator.report_doors_open
       elevator.go_to_destination(request_floor_number)
     end
   end
@@ -36,7 +41,11 @@ class ElevatorController
   def get_elevator(request_floor_number)
     # unoccupied, stopped elevators at request floor always have the highest
     # priority
-    elevator = @elevators.select {|e| e.current_floor == request_floor_number && e.occupied == Elevator::UNOCCUPIED}.first
+    elevator = get_all_elevators.select do |e|
+      e.current_floor == request_floor_number &&
+        e.occupied == Elevator::UNOCCUPIED
+    end.first
+    
     return elevator if elevator
 
     # when a request is made, the unoccupied elevator closest to it will answer
@@ -57,9 +66,6 @@ class ElevatorController
     end
 
     elevator = unoccupied_elevators[index_of_closest_elevator]
-
-    elevator.go_to_destination(request_floor_number)
-    elevator.report_doors_open
 
     if elevator
       return elevator
