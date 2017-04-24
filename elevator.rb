@@ -13,6 +13,7 @@ class Elevator
   DOORS_OPEN = "OPEN"
   NOT_UNDER_MAINTENANCE = "NOT_UNDER_MAINTENANCE"
   UNDER_MAINTENANCE = "UNDER_MAINTENANCE"
+  MAINTENANCE_TRIP_COUNT = 100
 
   def initialize()
     @occupied = UNOCCUPIED
@@ -47,6 +48,7 @@ class Elevator
 
     # iterate over floors and report floors in appropriate direction
     floor_difference.times do |f|
+      sleep 1
       report_floor_number(f)
     end
 
@@ -68,7 +70,7 @@ class Elevator
 
   def time_for_maintenance?
     # maintenance mode after 100 trips w/ no functionality until serviced
-    maintenance_needed = @trip_count > 100
+    maintenance_needed = @trip_count > MAINTENANCE_TRIP_COUNT
 
     puts "Elevator entered into maintenance." if maintenance_needed
     maintenance_needed

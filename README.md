@@ -2,6 +2,16 @@
 
 The following challenge was given as part of a technical interview and had a two hour time limit.
 
+## Running
+
+Install minitest-color:
+
+`gem install minitest-color`
+
+Run tests with color:
+
+`ruby kf_challenge_test.rb --color`
+
 ## Overview
 
 You’re designing the software that simulates elevators in a building.
