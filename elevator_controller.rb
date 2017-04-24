@@ -45,27 +45,40 @@ class ElevatorController
       e.current_floor == request_floor_number &&
         e.occupied == Elevator::UNOCCUPIED
     end.first
-    
+
     return elevator if elevator
 
     # when a request is made, the unoccupied elevator closest to it will answer
     # the call, unless an occupied elevator is moving and will pass that floor
     # on its way.
 
-    index_of_closest_elevator = 0
-    unoccupied_elevators = get_unoccupied_elevators
-
-    unoccupied_elevators.each_with_index do |e, i|
-      current_floor = e.current_floor
-      current_floor_difference = (request_floor_number - current_floor).abs
-      previous_floor_difference = (request_floor_number - @elevators[index_of_closest_elevator].current_floor).abs
-
-      if current_floor_difference < previous_floor_difference
-        index_of_closest_elevator = i
-      end
+    all_elevators = get_all_elevators
+    passing_elevators = all_elevators.select do |e|
+      e.occupied == Elevator::OCCUPIED &&
+        e.door_status == Elevator::DOORS_CLOSED &&
+        e.current_floor &&
+        e.destination_floor &&
+        request_floor_number.between?(e.current_floor, e.destination_floor)
     end
 
-    elevator = unoccupied_elevators[index_of_closest_elevator]
+    if !passing_elevators.empty?
+      elevator = passing_elevators[0]
+    else
+      index_of_closest_elevator = 0
+      unoccupied_elevators = get_unoccupied_elevators
+
+      unoccupied_elevators.each_with_index do |e, i|
+        current_floor = e.current_floor
+        current_floor_difference = (request_floor_number - current_floor).abs
+        previous_floor_difference = (request_floor_number - @elevators[index_of_closest_elevator].current_floor).abs
+
+        if current_floor_difference < previous_floor_difference
+          index_of_closest_elevator = i
+        end
+      end
+
+      elevator = unoccupied_elevators[index_of_closest_elevator]
+    end
 
     if elevator
       return elevator

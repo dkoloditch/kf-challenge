@@ -30,8 +30,8 @@ class ElevatorTest < Minitest::Test
     elevators[0].occupied = Elevator::OCCUPIED
     elevators[1].occupied = Elevator::OCCUPIED
     unoccupied_elevators = ec.get_unoccupied_elevators
-    assert unoccupied_elevators.count, 1
-    assert unoccupied_elevators.first == elevators[2]
+    assert_equal 1, unoccupied_elevators.count
+    assert_equal elevators[2], unoccupied_elevators.first
   end
 
   def test_get_elevator_returns_passing_occupied_elevator_first
@@ -42,13 +42,15 @@ class ElevatorTest < Minitest::Test
     request_floor_number = 5
     elevators[0].occupied = Elevator::OCCUPIED
     elevators[0].current_floor = 1
+    elevators[0].door_status = Elevator::DOORS_CLOSED
+    elevators[0].destination_floor = 10
     elevators[1].occupied = Elevator::OCCUPIED
     elevators[0].current_floor = 2
     elevators[2].occupied = Elevator::OCCUPIED
     elevators[2].current_floor = 10
     elevators[3].current_floor = 6
 
-    assert_equal ec.get_elevator(5), elevators[0]
+    assert_equal elevators[0], ec.get_elevator(5)
   end
 
   def test_get_elevator_returns_closest_unoccupied_elevator
@@ -65,7 +67,7 @@ class ElevatorTest < Minitest::Test
     elevators[2].current_floor = 4
     elevators[3].current_floor = 1
 
-    assert_equal ec.get_elevator(3), elevators[3]
+    assert_equal elevators[3], ec.get_elevator(3)
 
     # unoccupied elevator is closest
     request_floor_number = 5
@@ -77,6 +79,6 @@ class ElevatorTest < Minitest::Test
     elevators[2].current_floor = 10
     elevators[3].current_floor = 6
 
-    assert_equal ec.get_elevator(5), elevators[3]
+    assert_equal elevators[3], ec.get_elevator(5)
   end
 end

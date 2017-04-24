@@ -7,12 +7,12 @@ class Elevator
   attr_accessor :floors_passed
   attr_accessor :maintenance_status
 
-  UNOCCUPIED = 0
-  OCCUPIED = 1
-  DOORS_CLOSED = 0
-  DOORS_OPEN = 1
-  NOT_UNDER_MAINTENANCE = 0
-  UNDER_MAINTENANCE = 1
+  UNOCCUPIED = "UNOCCUPIED"
+  OCCUPIED = "OCCUPIED"
+  DOORS_CLOSED = "CLOSED"
+  DOORS_OPEN = "OPEN"
+  NOT_UNDER_MAINTENANCE = "NOT_UNDER_MAINTENANCE"
+  UNDER_MAINTENANCE = "UNDER_MAINTENANCE"
 
   def initialize()
     @occupied = UNOCCUPIED
